@@ -1,0 +1,369 @@
+<title>혼커톤</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow app column. Each goal is a card whose centre is a 7-per-row stamp sheet; prototype controls sit in a dashed strip apart from product UI. */
+:root {
+  --bg: #EEF2F4; --surface: #FFFFFF; --sunk: #E4EAEE; --ink: #131C24; --muted: #5A6875; --line: #D3DCE3;
+  --accent: #2546D9; --accent-ink: #FFFFFF;
+  --make: #A84C06; --make-bg: #FCEBD9; --take: #6D3CC0; --take-bg: #EEE6FB;
+  --ok: #14804A; --ok-bg: #DDF3E6;
+  --display: "Do Hyeon", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1318; --surface: #171E26; --sunk: #10161C; --ink: #E6ECF1; --muted: #94A2AF; --line: #2B3642;
+  --accent: #8EA2FF; --accent-ink: #0E1318;
+  --make: #F2A65A; --make-bg: #3A2A18; --take: #B99BF5; --take-bg: #2B2340;
+  --ok: #5CCB8F; --ok-bg: #173325; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1318; --surface: #171E26; --sunk: #10161C; --ink: #E6ECF1; --muted: #94A2AF; --line: #2B3642;
+  --accent: #8EA2FF; --accent-ink: #0E1318;
+  --make: #F2A65A; --make-bg: #3A2A18; --take: #B99BF5; --take-bg: #2B2340;
+  --ok: #5CCB8F; --ok-bg: #173325; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 96px }
+.wrap { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px }
+h1, h2, h3, p { margin: 0 }
+h2 { font-family: var(--display); font-weight: 400; font-size: 24px; line-height: 1.25; text-wrap: balance }
+h3 { font-size: 17px; font-weight: 600; line-height: 1.4; text-wrap: balance }
+.muted { color: var(--muted) } .small { font-size: 13px }
+button, input, textarea, select { font: inherit; color: inherit }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 20px 4px }
+.logo { font-family: var(--display); font-size: 30px; line-height: 1 }
+.logo span { color: var(--accent) }
+.cohort { text-align: right; font-size: 13px; color: var(--muted) }
+.cohort b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums }
+
+nav.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto }
+nav.tabs a { padding: 10px 14px; text-decoration: none; color: var(--muted); font-weight: 500; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -1px }
+nav.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent) }
+
+.proto { border: 1px dashed var(--muted); border-radius: 8px; padding: 10px 12px; display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap; font-size: 13px }
+.proto .lab { color: var(--muted); margin-right: auto; min-width: 0 }
+
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 500 }
+.btn:hover { border-color: var(--muted) }
+.btn.pri { background: var(--accent); border-color: var(--accent); color: var(--accent-ink) }
+.btn.sm { padding: 5px 10px; font-size: 13px }
+.btn:disabled { opacity: .5; cursor: not-allowed }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; font-size: inherit }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+.row { display: flex; gap: 8px 12px; align-items: center; flex-wrap: wrap }
+.row > .grow { flex: 1; min-width: 0 }
+.chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap }
+.chip.make { background: var(--make-bg); color: var(--make) }
+.chip.take { background: var(--take-bg); color: var(--take) }
+.chip.ok { background: var(--ok-bg); color: var(--ok) }
+.chip.wait { background: var(--sunk); color: var(--muted) }
+.streak { font-family: var(--display); font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums }
+.streak small { font-family: var(--body); font-size: 12px; color: var(--muted); margin-left: 3px }
+
+.sheet { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; max-width: 340px }
+.st { aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed var(--line); display: grid; place-items: center; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums }
+.st.miss { border-style: solid; background: var(--sunk) }
+.st.done { border: 0; color: var(--accent-ink); font-weight: 600 }
+.make .st.done { background: var(--make) } .take .st.done { background: var(--take) }
+.st.today { outline: 2px solid var(--ink); outline-offset: 2px }
+.weeks { display: flex; gap: 6px; flex-wrap: wrap }
+
+.box { background: var(--sunk); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+form { display: flex; flex-direction: column; gap: 10px; margin: 0 }
+label { font-size: 13px; font-weight: 600; display: flex; flex-direction: column; gap: 4px }
+label .hint { font-weight: 400; color: var(--muted) }
+input[type=text], input[type=url], textarea, select { width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 9px 11px }
+textarea { resize: vertical; min-height: 64px }
+.err { color: #C2302B; font-size: 13px }
+.types { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+@media (max-width: 480px) { .types { grid-template-columns: 1fr } }
+.types label { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--surface); cursor: pointer; font-weight: 400; flex-direction: row; gap: 8px; align-items: flex-start }
+.types label:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent) }
+.types b { display: block; font-weight: 600 }
+
+.post { display: flex; flex-direction: column; gap: 10px }
+.who { display: flex; gap: 10px; align-items: center; min-width: 0 }
+.av { width: 34px; height: 34px; border-radius: 50%; background: var(--sunk); display: grid; place-items: center; font-weight: 600; flex: none }
+.av.me { background: var(--accent); color: var(--accent-ink) }
+.who .meta { min-width: 0; line-height: 1.35 }
+.body { white-space: pre-wrap; overflow-wrap: anywhere }
+.fields { display: flex; flex-direction: column; gap: 8px; border-left: 2px solid var(--line); padding-left: 12px }
+.fields dt { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .02em }
+.fields dd, dl { margin: 0 } .fields dd { white-space: pre-wrap; overflow-wrap: anywhere }
+.rx { display: flex; gap: 6px; flex-wrap: wrap }
+.rx button { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 3px 11px; font-size: 13px; cursor: pointer; font-variant-numeric: tabular-nums }
+.rx button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600 }
+.cms { display: flex; flex-direction: column; gap: 4px; font-size: 14px }
+.cmform { flex-direction: row; gap: 6px } .cmform input { flex: 1; min-width: 0 }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px }
+.stat { background: var(--sunk); border-radius: 8px; padding: 10px 12px }
+.stat b { display: block; font-family: var(--display); font-weight: 400; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums }
+.stat span { font-size: 12px; color: var(--muted) }
+.empty { text-align: center; padding: 28px 12px; color: var(--muted) }
+
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 14px; max-width: calc(100% - 32px); z-index: 20 }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="logo">혼커<span>톤</span></div>
+    <div class="cohort" id="cohort"></div>
+  </header>
+  <div class="proto" id="proto"></div>
+  <nav class="tabs" id="tabs" aria-label="화면">
+    <a href="#today">오늘</a><a href="#feed">피드</a><a href="#retro">회고</a><a href="#declare">선언</a>
+  </nav>
+  <main id="view" class="wrap"></main>
+</div>
+<div id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  var KEY = 'honkathon.proto.v1', LEN = 28;
+  var MEMBERS = {
+    jiu: { name: '지우', goal: '토이 프로젝트 매일 1커밋', type: 'make',
+      daily: ['로그인 화면 마크업 끝. 폼 검증은 내일.', 'API 라우트 두 개 붙였어요. 에러 처리는 아직 허술함.', '다크모드 토글 추가. 30분 컷!', '리팩터링만 했는데 커밋은 커밋이죠.', '배포 파이프라인 연결. 처음으로 URL이 생겼어요.', '버그 하나 잡는 데 한 시간. 원인은 오타였습니다.'],
+      weekly: [[['이번 주 만든 것', '로그인, 목록, 상세 화면까지 연결했어요.'], ['막힌 점', '상태 관리를 어디에 둘지 계속 흔들렸어요.'], ['다음 주 할 것', '글쓰기 화면과 배포 자동화.']],
+               [['이번 주 만든 것', '글쓰기 화면, 이미지 업로드, 첫 배포.'], ['막힌 점', '이미지 용량 제한을 뒤늦게 알았어요.'], ['다음 주 할 것', '지인 3명에게 써보게 하고 피드백 받기.']]] },
+    seoyeon: { name: '서연', goal: '『사피엔스』 완독', type: 'take',
+      daily: ['농업혁명이 "사기"라는 표현이 왜 나왔는지 알았다. 개인의 삶은 더 고단해졌다는 것.', '화폐는 서로 모르는 사람끼리의 신뢰를 가능하게 한 장치라는 점.', '제국이 문화를 섞는 믹서 역할을 했다는 관점이 새로웠다.', '"허구를 믿는 능력"이 대규모 협력의 조건이라는 것.', '과학혁명의 출발이 "우리는 모른다"는 인정이었다는 것.'],
+      weekly: [[['요약 3줄', '인지혁명으로 허구를 공유하게 됐다.\n농업혁명은 인구를 늘렸지만 개인은 더 힘들어졌다.\n화폐·제국·종교가 인류를 하나로 묶었다.'], ['인상 깊었던 점', '밀이 인간을 길들였다는 뒤집힌 시선. 주어를 바꾸니 역사가 달리 보였어요.'], ['적용할 점', '내가 "당연히 좋은 것"이라 믿는 습관 하나를 골라 정말 나에게 이득인지 따져보기.']],
+               [['요약 3줄', '과학혁명은 무지의 인정에서 시작됐다.\n과학·제국·자본이 서로를 밀어줬다.\n성장에 대한 믿음이 신용을 만들었다.'], ['인상 깊었던 점', '신용이 "미래에 대한 신뢰"라는 설명. 대출이 다르게 보였어요.'], ['적용할 점', '모르는 걸 모른다고 회의에서 먼저 말해보기.']]] },
+    dohyun: { name: '도현', goal: '주 3회 5km 러닝', type: 'make',
+      daily: ['5.2km, 31분. 초반에 너무 달려서 후반에 걸었어요.', '비 와서 3km만. 그래도 나갔다는 데 의의.', '5km 29분 40초. 처음으로 30분 안쪽!', '회복 러닝 4km. 천천히 뛰는 게 더 어렵네요.'],
+      weekly: [[['이번 주 만든 것', '3회, 총 13.2km. 기록 사진 3장.'], ['막힌 점', '아침에 일어나는 게 제일 큰 벽.'], ['다음 주 할 것', '전날 밤에 옷을 꺼내두기.']],
+               [['이번 주 만든 것', '3회, 총 14km. 30분 벽을 깼어요.'], ['막힌 점', '무릎이 살짝 불편해서 하루 쉬었어요.'], ['다음 주 할 것', '스트레칭 10분 붙이기.']]] },
+    haram: { name: '하람', goal: '운영체제 강의 완강', type: 'take',
+      daily: ['프로세스와 스레드의 차이는 "주소 공간을 공유하느냐"로 정리된다.', '컨텍스트 스위칭 비용이 생각보다 크다. 캐시가 날아가서.', '데드락 4조건 중 하나만 깨도 된다는 것.', '페이지 폴트는 에러가 아니라 정상 동작이라는 점.', '뮤텍스와 세마포어의 차이는 소유권 유무.'],
+      weekly: [[['요약 3줄', '프로세스는 자원의 단위, 스레드는 실행의 단위.\n스케줄러는 공정성과 응답성 사이에서 타협한다.\n동기화는 임계 구역을 지키는 문제다.'], ['인상 깊었던 점', '라운드 로빈의 타임 슬라이스 길이에 따라 체감이 완전히 달라지는 데모.'], ['적용할 점', '회사 배치 작업의 스레드 풀 크기가 왜 그 값인지 확인해 보기.']],
+               [['요약 3줄', '가상 메모리는 물리 메모리보다 큰 주소 공간을 준다.\n페이지 교체는 지역성에 기댄다.\nTLB가 변환 비용을 줄인다.'], ['인상 깊었던 점', '스래싱이 일어나면 일은 안 하고 교체만 한다는 것. 내 멀티태스킹 같았어요.'], ['적용할 점', '서버 스왑 사용량 모니터링 지표 추가하기.']]] }
+  };
+  var BOTS = Object.keys(MEMBERS), BUDDY = 'jiu';
+  var RX = [['cheer', '응원해요'], ['learn', '배웠어요'], ['ask', '궁금해요']];
+  var TPL = {
+    take: [['요약 3줄', 3], ['인상 깊었던 점과 이유', 1], ['내 생각 또는 적용할 점', 1]],
+    make: [['이번 주 만든 것', 1], ['막힌 점', 1], ['다음 주 할 것', 1]]
+  };
+  var state, view = 'today', open = {}, armed = false, toastT;
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function load() { try { var s = JSON.parse(localStorage.getItem(KEY)); if (s && s.posts && s.goals) return s; } catch (e) {} return null; }
+  function uid() { return 'p' + (state.seq++); }
+  function toast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { t.hidden = true; }, 3200); }
+  function post(p) { p.id = uid(); p.rx = { cheer: [], learn: [], ask: [] }; p.cm = []; state.posts.push(p); return p; }
+  function rxCount(p) { return p.rx.cheer.length + p.rx.learn.length + p.rx.ask.length; }
+  function week(d) { return Math.floor(d / 7); }
+
+  /* --- 다른 참여자 시뮬레이션 --- */
+  function botDay(d) {
+    BOTS.forEach(function (k, i) {
+      var m = MEMBERS[k];
+      if ((3 * d + 2 * i) % 7 !== 0) post({ who: k, goal: m.goal, type: m.type, kind: 'daily', day: d, text: m.daily[(d + i) % m.daily.length] });
+      if (d % 7 === 6) post({ who: k, goal: m.goal, type: m.type, kind: 'output', day: d, f: m.weekly[week(d) % m.weekly.length] });
+    });
+  }
+  function peersReact() {
+    var n = 0;
+    state.posts.forEach(function (p) {
+      if (p.who !== 'me' || rxCount(p)) return;
+      p.rx.cheer.push(BUDDY); n++;
+      if (p.kind === 'output') { p.rx.learn.push('seoyeon'); p.cm.push({ who: BUDDY, text: '마지막 항목이 구체적이라 좋아요. 다음 주에 해본 결과도 궁금해요.' }); }
+    });
+    return n;
+  }
+  function nextDay() { state.day++; peersReact(); botDay(state.day); }
+
+  function fresh(sample) {
+    state = { v: 1, seq: 1, day: 0, goals: [], posts: [], sample: !!sample, closing: {} };
+    botDay(0);
+    if (!sample) return;
+    var g = { id: 'g' + (state.seq++), title: '『클린 아키텍처』 완독하기', type: 'take', done: '독후감 1편을 블로그에 올린다', form: '독후감' };
+    state.goals.push(g);
+    var lines = ['아키텍처의 목표는 필요한 인력을 최소화하는 것이라는 정의.', '"빨리 가는 유일한 방법은 제대로 가는 것"이라는 문장.', 'SRP의 "책임"은 기능이 아니라 변경을 요청하는 사람 기준이라는 것.', 'OCP는 변경 비용이 큰 쪽을 보호하는 방향으로 의존성을 건다는 것.', null, '의존성 역전은 소스 코드 의존 방향과 제어 흐름을 반대로 만드는 일.', '컴포넌트 응집 3원칙은 서로 당기는 관계라 균형을 잡아야 한다는 것.', '경계는 "나중에 결정해도 되는 것"을 미루기 위해 긋는다는 것.', '프레임워크는 세부사항이다. 결혼하지 말고 사귀기만 하라는 비유.'];
+    for (var d = 0; d < 9; d++) {
+      if (lines[d]) post({ who: 'me', goalId: g.id, goal: g.title, type: 'take', kind: 'daily', day: d, text: lines[d] });
+      if (d === 6) post({ who: 'me', goalId: g.id, goal: g.title, type: 'take', kind: 'output', day: d, f: [['요약 3줄', '좋은 아키텍처는 변경 비용을 낮게 유지한다.\nSOLID는 모듈 수준에서 변경의 방향을 정리한다.\n의존성은 항상 덜 변하는 쪽을 향해야 한다.'], ['인상 깊었던 점과 이유', 'SRP의 책임이 "액터" 기준이라는 설명. 그동안 기능 단위로 쪼개면서 왜 계속 같이 고치게 되는지 몰랐는데 이유를 알았다.'], ['내 생각 또는 적용할 점', '지금 프로젝트의 주문 서비스 클래스를 누가 변경을 요청하는지 기준으로 다시 나눠 보기.']] });
+      nextDay();
+    }
+  }
+
+  /* --- 계산 --- */
+  function mine(g, kind) { return state.posts.filter(function (p) { return p.who === 'me' && p.goalId === g.id && p.kind === kind; }); }
+  function streaks(g) {
+    var days = {}; mine(g, 'daily').forEach(function (p) { days[p.day] = 1; });
+    var cur = 0, d = days[state.day] ? state.day : state.day - 1;
+    while (d >= 0 && days[d]) { cur++; d--; }
+    var best = 0, run = 0;
+    for (d = 0; d <= state.day; d++) { run = days[d] ? run + 1 : 0; if (run > best) best = run; }
+    return { days: days, cur: cur, best: best, count: Object.keys(days).length };
+  }
+  function outOf(g, w) { return mine(g, 'output').filter(function (p) { return week(p.day) === w; })[0]; }
+  function typeName(t) { return t === 'make' ? '만드는 활동' : '받아들이는 활동'; }
+  function outName(g) { return g.type === 'take' ? '인출물' : '주간 진척 정리'; }
+
+  /* --- 화면 조각 --- */
+  function fieldsHtml(f) { return '<dl class="fields">' + f.map(function (x) { return '<div><dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd></div>'; }).join('') + '</dl>'; }
+  function postHtml(p) {
+    var me = p.who === 'me', name = me ? '나' : MEMBERS[p.who].name;
+    var when = p.day === state.day ? '오늘' : (p.day + 1) + '일차';
+    var kind = p.kind === 'output' ? (p.type === 'take' ? '인출물' : '주간 진척 정리') : '오늘 인증';
+    var h = '<article class="card post"><div class="who"><div class="av' + (me ? ' me' : '') + '">' + esc(name[0]) + '</div><div class="meta grow"><b>' + esc(name) + '</b>' + (p.who === BUDDY ? ' <span class="small muted">내 버디</span>' : '') + '<div class="small muted">' + esc(p.goal) + ' · ' + when + '</div></div><span class="chip ' + p.type + '">' + kind + '</span></div>';
+    if (p.kind === 'output') h += fieldsHtml(p.f);
+    else h += '<p class="body">' + esc(p.text) + '</p>' + (p.link ? '<a class="small" href="' + esc(p.link) + '" target="_blank" rel="noopener">' + esc(p.link) + '</a>' : '');
+    h += '<div class="rx">' + RX.map(function (r) { var on = p.rx[r[0]].indexOf('me') >= 0; return '<button type="button" data-act="rx" data-id="' + p.id + '" data-k="' + r[0] + '" aria-pressed="' + on + '">' + r[1] + ' ' + p.rx[r[0]].length + '</button>'; }).join('') + '</div>';
+    if (p.cm.length) h += '<div class="cms">' + p.cm.map(function (c) { return '<div><b>' + esc(c.who === 'me' ? '나' : MEMBERS[c.who].name) + '</b> ' + esc(c.text) + '</div>'; }).join('') + '</div>';
+    h += '<form class="cmform" data-form="cm" data-id="' + p.id + '"><input type="text" id="cm-' + p.id + '" name="t" placeholder="피드백 한 줄 남기기" aria-label="댓글"><button class="btn sm">남기기</button></form></article>';
+    return h;
+  }
+  function outFormHtml(g) {
+    var h = '<form class="box" data-form="out" data-g="' + g.id + '"><b>' + (week(state.day) + 1) + '주차 ' + outName(g) + (g.type === 'take' ? ' (' + esc(g.form) + ')' : '') + '</b>';
+    TPL[g.type].forEach(function (t, i) {
+      if (t[1] === 3) { h += '<label>' + t[0] + '<span class="hint">한 줄에 하나씩, 세 줄을 모두 채워요.</span>'; for (var j = 0; j < 3; j++) h += '<input type="text" id="o-' + g.id + '-s' + j + '" name="s' + j + '" aria-label="요약 ' + (j + 1) + '">'; h += '</label>'; }
+      else h += '<label>' + t[0] + '<textarea id="o-' + g.id + '-f' + i + '" name="f' + i + '"></textarea></label>';
+    });
+    return h + '<p class="err" hidden></p><div class="row"><button class="btn pri">올리기</button><span class="small muted">동료 반응을 1개 이상 받으면 완료로 바뀌어요.</span></div></form>';
+  }
+  function goalCard(g) {
+    var s = streaks(g), today = mine(g, 'daily').filter(function (p) { return p.day === state.day; })[0];
+    var h = '<section class="card ' + g.type + '"><div class="row"><div class="grow"><span class="chip ' + g.type + '">' + typeName(g.type) + '</span><h3>' + esc(g.title) + '</h3><p class="small muted">완료 기준: ' + esc(g.done) + '</p></div><div class="streak">' + s.cur + '<small>일 연속</small></div></div>';
+    h += '<div class="sheet" aria-label="인증 도장판">';
+    for (var d = 0; d < LEN; d++) h += '<div class="st' + (s.days[d] ? ' done' : d < state.day ? ' miss' : '') + (d === state.day ? ' today' : '') + '">' + (d + 1) + '</div>';
+    h += '</div>';
+    if (today) h += '<div class="box"><div class="row"><span class="chip ok">오늘 인증 완료</span></div><p class="body">' + esc(today.text) + '</p></div>';
+    else if (g.type === 'take') h += '<form class="box" data-form="ci" data-g="' + g.id + '"><label>오늘 알게 된 것 1개<span class="hint">읽거나 들은 걸 안 보고 떠올려서 한 줄로 적어요. "읽었음"만으로는 인증이 안 돼요.</span><textarea id="ci-' + g.id + '" name="text" placeholder="예: SRP의 책임은 기능이 아니라 변경을 요청하는 사람 기준이다."></textarea></label><p class="err" hidden></p><div><button class="btn pri">인증하기</button></div></form>';
+    else h += '<form class="box" data-form="ci" data-g="' + g.id + '"><label>오늘 만든 것<span class="hint">만든 것 자체가 결과물이에요. 한 줄 설명과 링크면 충분해요.</span><input type="text" id="ci-' + g.id + '" name="text" placeholder="예: 로그인 화면 마크업 완료"></label><label>결과물 링크 (선택)<input type="url" id="cil-' + g.id + '" name="link" placeholder="https://"></label><p class="err" hidden></p><div><button class="btn pri">인증하기</button></div></form>';
+    h += '<div class="row"><span class="small muted grow">주마다 한 번: ' + outName(g) + '</span><div class="weeks">';
+    for (var w = 0; w <= week(state.day); w++) { var o = outOf(g, w); h += '<span class="chip ' + (o ? (rxCount(o) ? 'ok' : 'wait') : 'wait') + '">' + (w + 1) + '주차 ' + (o ? (rxCount(o) ? '완료' : '반응 대기') : '미제출') + '</span>'; }
+    h += '</div></div>';
+    if (!outOf(g, week(state.day))) h += open[g.id] ? outFormHtml(g) : '<div><button class="btn" data-act="open" data-g="' + g.id + '">' + (week(state.day) + 1) + '주차 ' + outName(g) + ' 쓰기</button></div>';
+    return h + '</section>';
+  }
+
+  function vToday() {
+    if (!state.goals.length) return '<div class="card empty"><h2>아직 선언한 목표가 없어요</h2><p>하고 싶던 일 하나를 선언하면 오늘부터 인증 도장판이 생겨요.</p><div><a class="btn pri" href="#declare" style="text-decoration:none">목표 선언하기</a></div></div>';
+    var b = MEMBERS[BUDDY], bp = state.posts.filter(function (p) { return p.who === BUDDY && p.day === state.day && p.kind === 'daily'; })[0];
+    return '<h2>' + (state.day + 1) + '일차, 오늘 한 것을 남겨요</h2>' + state.goals.map(goalCard).join('') +
+      '<section class="card"><div class="row"><div class="who grow"><div class="av">' + b.name[0] + '</div><div class="meta"><b>내 버디 ' + b.name + '</b><div class="small muted">' + esc(b.goal) + '</div></div></div>' +
+      (bp ? '<span class="chip ok">오늘 인증 완료</span>' : '<button class="btn sm" data-act="poke">콕 찌르기</button>') + '</div>' + (bp ? '<p class="body small">' + esc(bp.text) + '</p>' : '<p class="small muted">아직 오늘 인증이 없어요.</p>') + '</section>';
+  }
+  function vFeed() {
+    var ps = state.posts.slice().sort(function (a, b) { return b.day - a.day || (b.kind === 'output') - (a.kind === 'output') || (a.id < b.id ? 1 : -1); }).slice(0, 40);
+    return '<h2>11월 기수 피드</h2><p class="muted small">같은 혼커톤 참여자 5명의 인증과 인출물이에요. 반응이나 한 줄 피드백을 남겨 보세요.</p>' + ps.map(postHtml).join('');
+  }
+  function vRetro() {
+    if (!state.goals.length) return '<div class="card empty"><h2>회고할 기록이 아직 없어요</h2><p>목표를 선언하고 인증을 쌓으면 여기에 모여요.</p></div>';
+    var left = LEN - 1 - state.day, h = '<h2>' + (left > 0 ? '지금까지 쌓인 것' : '4주가 끝났어요') + '</h2><p class="muted small">' + (left > 0 ? '종료까지 ' + left + '일 남았어요. 인출물은 여기에 계속 모여요.' : '끝까지 못 했어도 어디까지 했고 무엇을 배웠는지 남기면 완주로 인정해요.') + '</p>';
+    state.goals.forEach(function (g) {
+      var s = streaks(g), outs = mine(g, 'output'), c = state.closing[g.id];
+      h += '<section class="card"><div><span class="chip ' + g.type + '">' + typeName(g.type) + '</span><h3>' + esc(g.title) + '</h3></div><div class="stats"><div class="stat"><b>' + s.count + '/' + (state.day + 1) + '</b><span>인증한 날</span></div><div class="stat"><b>' + s.best + '</b><span>최장 연속</span></div><div class="stat"><b>' + outs.length + '/' + (week(state.day) + 1) + '</b><span>' + outName(g) + '</span></div></div>';
+      outs.forEach(function (o) { h += '<div><div class="row"><b class="small">' + (week(o.day) + 1) + '주차 ' + outName(g) + '</b><span class="chip ' + (rxCount(o) ? 'ok">완료' : 'wait">반응 대기') + '</span></div>' + fieldsHtml(o.f) + '</div>'; });
+      if (!outs.length) h += '<p class="small muted">아직 올린 ' + outName(g) + '이 없어요.</p>';
+      if (c) h += '<div class="box"><div class="row"><span class="chip ok">' + (c.full ? '완주' : '중간 결과물로 완주') + '</span></div><p class="body">' + esc(c.text) + '</p></div>';
+      else if (left <= 0 || open['c' + g.id]) h += '<form class="box" data-form="close" data-g="' + g.id + '"><label>마무리 회고<span class="hint">어디까지 했고, 무엇을 배웠는지 적어요.</span><textarea id="cl-' + g.id + '" name="text"></textarea></label><label style="flex-direction:row;align-items:center;gap:8px;font-weight:400"><input type="checkbox" id="clf-' + g.id + '" name="full"> 완료 기준(' + esc(g.done) + ')을 달성했어요</label><p class="err" hidden></p><div><button class="btn pri">마무리하기</button></div></form>';
+      else h += '<div><button class="btn sm" data-act="open" data-g="c' + g.id + '">여기서 마무리하기</button></div>';
+      h += '</section>';
+    });
+    if (state.goals.every(function (g) { return state.closing[g.id]; })) h += '<div class="card"><h3>다음 혼커톤</h3><p class="small muted">회고에서 나온 것을 다음 선언으로 이어 가요.</p><div><button class="btn pri" data-act="again">새 기수로 다시 선언하기</button></div></div>';
+    return h;
+  }
+  function vDeclare() {
+    var h = '<h2>목표 선언</h2>';
+    if (state.goals.length) h += '<section class="card"><b class="small muted">내 선언</b>' + state.goals.map(function (g) { return '<div class="row"><div class="grow"><span class="chip ' + g.type + '">' + typeName(g.type) + '</span> <b>' + esc(g.title) + '</b><div class="small muted">완료 기준: ' + esc(g.done) + (g.type === 'take' ? ' · 인출물: ' + esc(g.form) : '') + '</div></div><button class="btn sm" data-act="del" data-g="' + g.id + '">삭제</button></div>'; }).join('') + '</section>';
+    h += '<form class="card" data-form="goal"><label>하고 싶은 일<input type="text" id="g-title" name="title" placeholder="예: 『사피엔스』 완독하기, 매일 그림 한 장"></label>' +
+      '<div><div class="small" style="font-weight:600;margin-bottom:4px">활동 유형</div><div class="types"><label><input type="radio" name="type" id="g-make" value="make" checked><span><b>만드는 활동</b><span class="small muted">코딩, 그림, 운동 기록. 만든 것 자체로 인증해요.</span></span></label><label><input type="radio" name="type" id="g-take" value="take"><span><b>받아들이는 활동</b><span class="small muted">독서, 강의, 영화. 인출물이 있어야 인증돼요.</span></span></label></div></div>' +
+      '<label>완료 기준<span class="hint" id="g-donehint">분량보다 결과물로 적어요. 예: 지인 3명이 써볼 수 있게 배포한다</span><input type="text" id="g-done" name="done"></label>' +
+      '<label id="g-formwrap" hidden>인출물 형태<select id="g-form" name="form"><option>독후감</option><option>후기 글</option><option>3분 발표</option><option>마인드맵</option><option>다른 사람용 퀴즈</option></select></label>' +
+      '<p class="small muted" id="g-rule">매일: 만든 것 사진이나 링크 한 줄 · 매주: 진척 정리</p><p class="err" hidden></p><div><button class="btn pri">선언하기</button></div></form>';
+    return h;
+  }
+
+  function render() {
+    var left = LEN - 1 - state.day;
+    document.getElementById('cohort').innerHTML = '11월 기수 · 5명<br><b>' + (state.day + 1) + '일차</b> / ' + LEN + '일 · ' + (week(state.day) + 1) + '주차';
+    document.getElementById('proto').innerHTML = '<span class="lab">프로토타입 조작' + (state.sample ? ' · 지금 내 목표와 인증은 예시예요' : '') + '</span><button class="btn sm" data-act="next"' + (left <= 0 ? ' disabled' : '') + '>다음 날로 넘기기</button>' +
+      (state.sample ? '<button class="btn sm" data-act="clear">예시 지우고 내 선언으로 시작</button>' : '<button class="btn sm" data-act="reset">' + (armed ? '한 번 더 누르면 지워져요' : '예시 데이터로 초기화') + '</button>');
+    [].forEach.call(document.querySelectorAll('#tabs a'), function (a) { if (a.getAttribute('href') === '#' + view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    document.getElementById('view').innerHTML = ({ today: vToday, feed: vFeed, retro: vRetro, declare: vDeclare })[view]();
+  }
+  function route() { var h = (location.hash || '').slice(1); view = ['today', 'feed', 'retro', 'declare'].indexOf(h) >= 0 ? h : 'today'; render(); window.scrollTo(0, 0); }
+  function go(v) { if (location.hash === '#' + v) route(); else location.hash = v; }
+  function goal(id) { return state.goals.filter(function (g) { return g.id === id; })[0]; }
+  function fail(form, msg) { var e = form.querySelector('.err'); e.textContent = msg; e.hidden = false; }
+
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-act]'); if (!b) return;
+    var a = b.dataset.act;
+    if (a !== 'reset') armed = false;
+    if (a === 'next') { nextDay(); toast((state.day + 1) + '일차가 됐어요. 동료들의 새 인증이 올라왔어요.'); }
+    else if (a === 'clear') { fresh(false); save(); go('declare'); toast('예시를 지웠어요. 첫 목표를 선언해 보세요.'); return; }
+    else if (a === 'reset') { if (!armed) { armed = true; render(); return; } armed = false; fresh(true); toast('예시 데이터로 되돌렸어요.'); }
+    else if (a === 'open') open[b.dataset.g] = true;
+    else if (a === 'poke') toast(MEMBERS[BUDDY].name + ' 님을 콕 찔렀어요.');
+    else if (a === 'del') { var id = b.dataset.g; state.goals = state.goals.filter(function (g) { return g.id !== id; }); state.posts = state.posts.filter(function (p) { return p.goalId !== id; }); delete state.closing[id]; }
+    else if (a === 'again') { fresh(false); save(); go('declare'); toast('새 기수가 시작됐어요.'); return; }
+    else if (a === 'rx') { var p = state.posts.filter(function (x) { return x.id === b.dataset.id; })[0], arr = p.rx[b.dataset.k], i = arr.indexOf('me'); if (i >= 0) arr.splice(i, 1); else arr.push('me'); }
+    save(); render();
+  });
+
+  document.addEventListener('submit', function (ev) {
+    var f = ev.target, kind = f.dataset.form; if (!kind) return;
+    ev.preventDefault();
+    var v = function (n) { return (f.elements[n] ? f.elements[n].value : '').trim(); }, g = goal(f.dataset.g);
+    if (kind === 'ci') {
+      var t = v('text');
+      if (g.type === 'take' && t.length < 10) return fail(f, '알게 된 것을 10자 이상으로 적어 주세요. 떠올려서 쓰는 한 줄이 인출이에요.');
+      if (g.type === 'make' && t.length < 4) return fail(f, '오늘 만든 것을 한 줄로 적어 주세요.');
+      post({ who: 'me', goalId: g.id, goal: g.title, type: g.type, kind: 'daily', day: state.day, text: t, link: /^https?:\/\//.test(v('link')) ? v('link') : '' });
+      toast('오늘 도장을 찍었어요.');
+    } else if (kind === 'out') {
+      var fs = [], bad = false;
+      TPL[g.type].forEach(function (tp, i) {
+        var val = tp[1] === 3 ? [v('s0'), v('s1'), v('s2')] : v('f' + i);
+        if (tp[1] === 3) { if (val.some(function (x) { return x.length < 5; })) bad = true; val = val.join('\n'); }
+        else if (val.length < 15) bad = true;
+        fs.push([tp[0], val]);
+      });
+      if (bad) return fail(f, '모든 칸을 채워 주세요. 요약은 세 줄 모두, 나머지는 15자 이상이에요.');
+      var np = post({ who: 'me', goalId: g.id, goal: g.title, type: g.type, kind: 'output', day: state.day, f: fs });
+      open[g.id] = false; toast('올렸어요. 동료 반응을 기다리는 중이에요.');
+      setTimeout(function () {
+        if (state.posts.indexOf(np) < 0 || rxCount(np)) return;
+        np.rx.learn.push(BUDDY); save(); toast(MEMBERS[BUDDY].name + ' 님이 "배웠어요"를 남겼어요. ' + outName(g) + ' 완료!');
+        var ae = document.activeElement; if (!(ae && /INPUT|TEXTAREA/.test(ae.tagName) && ae.value)) render();
+      }, 4000);
+    } else if (kind === 'cm') {
+      if (!v('t')) return;
+      state.posts.filter(function (x) { return x.id === f.dataset.id; })[0].cm.push({ who: 'me', text: v('t') });
+    } else if (kind === 'close') {
+      if (v('text').length < 20) return fail(f, '어디까지 했고 무엇을 배웠는지 20자 이상으로 적어 주세요.');
+      state.closing[g.id] = { text: v('text'), full: f.elements.full.checked };
+      toast(f.elements.full.checked ? '완주를 축하해요.' : '중간 결과물로 완주가 인정됐어요.');
+    } else if (kind === 'goal') {
+      if (v('title').length < 2) return fail(f, '하고 싶은 일을 적어 주세요.');
+      if (v('done').length < 4) return fail(f, '완료 기준을 적어 주세요. 눈에 보이는 결과물로 적으면 좋아요.');
+      state.goals.push({ id: 'g' + (state.seq++), title: v('title'), type: f.elements.type.value, done: v('done'), form: v('form') });
+      state.sample = false; save(); go('today'); toast('선언했어요. 오늘부터 시작이에요.'); return;
+    }
+    save(); render();
+  });
+
+  document.addEventListener('change', function (ev) {
+    if (ev.target.name !== 'type' || !ev.target.closest('[data-form="goal"]')) return;
+    var take = ev.target.value === 'take';
+    document.getElementById('g-formwrap').hidden = !take;
+    document.getElementById('g-donehint').textContent = take ? '분량보다 인출로 적어요. 예: "한 권 다 읽기"보다 "독후감 한 편 쓰기"' : '분량보다 결과물로 적어요. 예: 지인 3명이 써볼 수 있게 배포한다';
+    document.getElementById('g-rule').textContent = take ? '매일: 오늘 알게 된 것 한 줄 · 매주: 정식 인출물 (요약 3줄, 인상 깊은 점, 적용할 점)' : '매일: 만든 것 사진이나 링크 한 줄 · 매주: 진척 정리';
+  });
+
+  state = load();
+  if (!state) { fresh(true); save(); }
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
